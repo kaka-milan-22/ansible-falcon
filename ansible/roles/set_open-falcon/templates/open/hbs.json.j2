@@ -1,0 +1,12 @@
+{
+    "debug": true,
+    "database": "{{ mysql_user }}:{{ mysql_pwd }}@tcp({{ mysql_ip }}:{{mysql_port}})/falcon_portal?loc=Local&parseTime=true",
+    "hosts": "",
+    "maxIdle": 100,
+    "listen": ":6030",
+    "trustable": [""],
+    "http": {
+        "enabled": true,
+        "listen": "0.0.0.0:6031"
+    }
+}

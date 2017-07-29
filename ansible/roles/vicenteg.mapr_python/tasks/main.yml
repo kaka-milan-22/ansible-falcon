@@ -1,0 +1,56 @@
+---
+# tasks file for ansible-mapr_python
+
+- name: install libxml and dependencies for the xml module
+  yum: name="{{item}}" state=present
+  become: yes
+  become_user: root
+  with_items:
+    - python-devel
+    - python-setuptools
+  when: ansible_distribution in ('CentOS','RedHat','Amazon')
+
+- name: copy pip source tarball
+  copy: src='pip-7.1.2.tar.gz#md5=3823d2343d9f3aaab21cf9c917710196' dest=/tmp mode=0644
+
+- name: copy requests wheel
+  copy: src='requests-2.8.0-py2.py3-none-any.whl#md5=52236eb6f886db4d2afba43775c97050' dest=/tmp/requests-2.8.0-py2.py3-none-any.whl mode=0644
+
+- name: install pip
+  command: easy_install /tmp/pip-7.1.2.tar.gz#md5=3823d2343d9f3aaab21cf9c917710196
+  become: yes
+  become_user: root
+  when: ansible_distribution in ('CentOS', 'RedHat', 'Amazon')
+
+- name: install requests (Amazon)
+  yum: name=python-requests state=present
+  become: yes
+  become_user: root
+  when: ansible_distribution in ('Amazon')
+
+- name: install requests (pip)
+  pip: name=/tmp/requests-2.8.0-py2.py3-none-any.whl state=present
+  become: yes
+  become_user: root
+  when: ansible_distribution not in ('Amazon')
+
+- name: install MySQL python module
+  yum: name=MySQL-python state=installed
+  become: yes
+  become_user: root
+  when: ansible_distribution in ("CentOS", "RedHat")
+
+- name: install MySQL python module (2.6 and 2.7)
+  yum: name={{item}} state=installed
+  become: yes
+  become_user: root
+  when: ansible_distribution in ("Amazon")
+  with_items:
+    - MySQL-python26
+    - MySQL-python27
+
+- name: install MySQL python module  on Debian derived OSes
+  apt: name=python-mysqldb state=installed
+  become: yes
+  become_user: root
+  when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"

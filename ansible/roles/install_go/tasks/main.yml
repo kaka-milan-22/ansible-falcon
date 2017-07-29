@@ -1,0 +1,27 @@
+---
+
+- name: add go_path and go_root to /etc/bashrc 
+  lineinfile:
+     dest:  /etc/bashrc 
+     insertafter: 'EOF' 
+     line: "{{item}}" 
+  with_items:
+    - "export GOROOT={{go_dir}}"
+    - "export GOPATH={{go_dir}}go/bin"
+    - "export PATH=$GOPATH:$PATH"
+
+- name: create install dir 
+  file:
+    path: "{{go_dir}}" 
+    state: directory
+    mode: 0755
+
+
+- name: tar go install file to go dir
+  unarchive:
+    src: ../files/go1.8.3.linux-amd64.tar.gz
+    dest: "{{go_dir}}" 
+    copy: yes
+
+- name: Execute /etc/bashrc  
+  action: shell source /etc/bashrc

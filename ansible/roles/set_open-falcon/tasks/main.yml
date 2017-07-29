@@ -1,0 +1,75 @@
+---
+- name: create install dir 
+  file:
+    path: "{{ dash_dir }}" 
+    state: directory
+    mode: 0755
+
+- name: tar dashboard to install dir 
+  unarchive:
+    src: ../files/dashboard.tar.gz
+    dest: "{{ dash_dir }}" 
+    copy: yes
+
+- name: tar dashboard to install dir 
+  unarchive:
+    src: ../files/open-falcon-v0.2.tar.gz
+    dest: "{{ open_dir }}" 
+    copy: yes
+
+- name: install dashboard pip package 
+  pip:
+    requirements: "{{ dash_dir }}dashboard/pip_requirements.txt"
+    virtualenv: "{{ dash_dir }}dashboard/env"
+
+- name: delete the exits dashboard db; 
+  shell: "/usr/bin/mysql -u{{ mysql_user }} -p{{ mysql_pwd }} -h{{mysql_ip }} -e '{{ item }}'"
+  with_items:
+    - "drop database IF EXISTS alarms"
+    - "drop database IF EXISTS dashboard"
+    - "drop database IF EXISTS falcon_portal"
+    - "drop database IF EXISTS graph"
+    - "drop database IF EXISTS uic"
+
+- name: init mysql db; 
+  shell: "/usr/bin/mysql -u{{ mysql_user }} -p{{ mysql_pwd }} -h{{mysql_ip }} < {{ dash_dir }}dashboard/db_init/{{ item }}"
+  with_items:
+    - "1_uic-db-schema.sql"
+    - "2_portal-db-schema.sql"
+    - "3_dashboard-db-schema.sql"
+    - "4_graph-db-schema.sql"
+    - "5_alarms-db-schema.sql"
+
+- name: Copy the template file to dashboard config
+  template: src=config.py.j2 dest="{{ dash_dir }}dashboard/rrd/config.py"
+
+- name: start up dashboard 
+  shell: "set -m && {{ dash_dir}}dashboard/env/bin/python {{ dash_dir }}dashboard/wsgi.py &"
+  args:
+    chdir: "{{ dash_dir }}dashboard"
+
+- name: Copy the template file to open-falcon config
+  template: src=open/aggregator.json.j2 dest='{{ open_dir }}aggregator/config/cfg.json'
+
+- name: Copy the template file to open-falcon config
+  template: src=open/alarm.json.j2 dest='{{ open_dir }}alarm/config/cfg.json'
+
+- name: Copy the template file to open-falcon config
+  template: src=open/api.json.j2 dest='{{ open_dir }}api/config/cfg.json'
+
+- name: Copy the template file to open-falcon config
+  template: src=open/graph.json.j2 dest='{{ open_dir }}graph/config/cfg.json'
+
+- name: Copy the template file to open-falcon config
+  template: src=open/hbs.json.j2 dest='{{ open_dir }}hbs/config/cfg.json'
+
+- name: Copy the template file to open-falcon config
+  template: src=open/judge.json.j2 dest='{{ open_dir }}judge/config/cfg.json'
+
+- name: Copy the template file to open-falcon config
+  template: src=open/nodata.json.j2 dest='{{ open_dir }}nodata/config/cfg.json'
+
+- name: start up open-falcon 
+  shell: "set -m && {{ open_dir }}open-falcon start"
+  args:
+    chdir: "{{ open_dir }}"

@@ -1,0 +1,12 @@
+- hosts: 127.0.0.1 
+  #gather_facts: false
+  roles:
+    - { role: set_repo}
+    - { role: install_go}
+    - { role: sbaerlocher.redis }
+    - { role: vicenteg.mysql_server,
+        mysql_root_user: root,
+        mysql_root_password: root123 }
+    - { role: set_open-falcon}
+
+

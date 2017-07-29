@@ -1,0 +1,31 @@
+---
+yum_pkgs:
+  - bind-utils
+  - gcc 
+  - python-devel
+  - gcc-c++ 
+  - libstdc++ 
+  - tcl 
+  - tcl-devel 
+  - glibc 
+  - glibc-devel 
+  - zlib 
+  - zlib-devel 
+  - texinfo 
+  - tk-devel 
+  - curl 
+  - curl-devel 
+  - openssl-devel
+  - mysql-devel
+  - perl 
+  - cpio 
+  - expat-devel
+  - vim
+  - nc
+  - xz
+  - unzip
+  - lrzsz
+  - gcc
+  - make
+  - kernel-devel
+
